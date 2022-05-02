@@ -58,7 +58,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-//reroutes short link
+//routes short link
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL,
   username: req.cookies['username'] };
@@ -71,18 +71,19 @@ app.get("/urls/:shortURL", (req, res) => {
 });*/
 
 
-
+//redirects short link to the actual long link
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
+//lets the user edit their linnk
 app.post("urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect('/urls');
 });
 
-//delete shorturl
+//delete link created
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
