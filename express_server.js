@@ -30,7 +30,9 @@ app.get("/urls.json", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase,
+    username: req.cookies["username"]
+   };
   res.render("urls_index", templateVars);
 });
 
@@ -41,6 +43,12 @@ app.get("/urls/new", (req, res) => {
 /*app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });*/
+
+//login post
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 
 //creates a short link and posts it
 app.post("/urls", (req, res) => {
@@ -71,6 +79,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
+
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
