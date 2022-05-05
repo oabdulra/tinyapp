@@ -106,10 +106,10 @@ app.post('/register', (req, res) => {
 
   users[userID] = {
     id: userID,
-    email: req.cookies['email'],
-    password: req.cookies['password']
+    email: req.body.email,
+    password: req.body.password
   }
-  res.redirect('/urls');
+  res.cookie('user',users[userID]);
 
 })
 
