@@ -3,6 +3,19 @@ const app = express();
 
 const PORT = 8080; // default port 8080
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const generateRandomString = () => {
 
   let randomStr = Math.random().toString(36).substring(2, 8);
@@ -30,15 +43,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//register user
-app.get('/register', (req, res) => {
-  const tinyUser = {
-    email: req.cookies['email'],
-    password: req.cookies['password']
-  }
-  res.render("register", tinyUser);
 
-});
 
 //login post
 app.post('/login', (req, res) => {
@@ -53,6 +58,7 @@ app.post("/logout" , (req, res) => {
   res.redirect('/urls');
 });
 
+
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
@@ -66,6 +72,7 @@ app.get("/urls/new", (req, res) => {
     username: req.cookies['username'] };
   res.render("urls_new", templateVars);
 });
+
 
 //creates a short link and posts it
 app.post("/urls", (req, res) => {
@@ -86,6 +93,25 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+
+//register user
+app.get('/register', (req, res) => {
+  
+  res.render("register", users);
+
+});
+
+app.post('/register', (req, res) => {
+  let userID = generateRandomString();
+
+  users[userID] = {
+    id: userID,
+    email: req.cookies['email'],
+    password: req.cookies['password']
+  }
+  res.redirect('/urls');
+
+})
 
 //lets the user edit their link
 app.post("urls/:shortURL", (req, res) => {
