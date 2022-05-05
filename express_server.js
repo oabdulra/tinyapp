@@ -23,11 +23,21 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+//register user
+app.get('/register', (req, res) => {
+  const tinyUser = {
+    email: req.cookies['email'],
+    password: req.cookies['password']
+  }
+  res.render("register", tinyUser);
+
 });
 
 //login post
@@ -37,16 +47,16 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+//logout user
+app.post("/logout" , (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
 app.get("/urls", (req, res) => {
-<<<<<<< HEAD
-  const templateVars = { urls: urlDatabase,
-    username: req.cookies["username"]
-   };
-=======
   const templateVars = { 
     urls: urlDatabase,
     username: req.cookies['username'] };
->>>>>>> feature/cookies
   res.render("urls_index", templateVars);
 });
 
@@ -57,19 +67,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-<<<<<<< HEAD
-/*app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});*/
-
-//login post
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
-
-=======
->>>>>>> feature/cookies
 //creates a short link and posts it
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
@@ -84,19 +81,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
-/*app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});*/
-
-
 //redirects short link to the actual long link
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
-//lets the user edit their linnk
+//lets the user edit their link
 app.post("urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect('/urls');
@@ -108,14 +99,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-<<<<<<< HEAD
-=======
-//logout user
-app.post("/logout" , (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
-});
->>>>>>> feature/cookies
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
