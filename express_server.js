@@ -3,6 +3,7 @@ const app = express();
 
 const PORT = 8080; // default port 8080
 
+//
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -16,12 +17,28 @@ const users = {
   }
 }
 
+
+/* ---------- helper functions --------------- */
+
+//create a random alphanumerical string
 const generateRandomString = () => {
-
   let randomStr = Math.random().toString(36).substring(2, 8);
+  
   return randomStr;
-
 }
+
+//searchs for a user with the email provided in form
+const userSearch = (email) => {
+
+  for (let user in users) {
+    if (email === users[user].email) {
+      return user;
+    };
+  };
+
+};
+
+/* 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -54,7 +71,7 @@ app.post('/login', (req, res) => {
 
 //logout user
 app.post("/logout" , (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user');
   res.redirect('/urls');
 });
 
@@ -62,14 +79,14 @@ app.post("/logout" , (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies['username'] };
+    user: users[user] };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies['username'] };
+    user: users[user] };
   res.render("urls_new", templateVars);
 });
 
@@ -84,7 +101,7 @@ app.post("/urls", (req, res) => {
 //routes short link
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL,
-  username: req.cookies['username'] };
+  users: users[user]};
   res.render("urls_show", templateVars);
 });
 
