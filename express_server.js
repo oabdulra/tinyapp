@@ -1,3 +1,6 @@
+/*-----------------------------------------------------------------------*/
+/* -------------------- constants & server starters -------------------- */
+/*-----------------------------------------------------------------------*/
 const express = require("express");
 const app = express();
 
@@ -8,6 +11,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+const bcrypt = require('bcryptjs');
 
 app.set("view engine", "ejs");
 
