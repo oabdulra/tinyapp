@@ -81,7 +81,7 @@ const userSearchForPassword = (email) => {
     }
   }
 };
-console.log(userSearchForPassword("user2@example.com"));
+
 
 //returns list of urls based on userID
 
@@ -92,11 +92,11 @@ const urlsForUser = (id) => {
   keys.forEach( (shortURL) => {
     let temp = urlDatabase[shortURL];
     if (id === temp.userID) {
-      console.log(temp);
+      
       urlObj[shortURL] = temp;
     }
   });
-  console.log(urlObj);
+  
   return urlObj;
 
 };
@@ -133,7 +133,7 @@ app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
   let user = userSearchForID(userEmail);
-  console.log(userSearchForPassword(userEmail));
+  
 
   if (!userSearch(userEmail)) {
     res.status(403).send('Email cannot be found! Please register your email');
@@ -253,7 +253,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
   let hashPass = bcrypt.hashSync(req.body.password, 10);
-  console.log(hashPass);
+  
   if(!req.body.email || !req.body.password) {
     res.status(403).send('Login error! Please enter both your username and password');
   } else if (userSearch(req.body.email)){
