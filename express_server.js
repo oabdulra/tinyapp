@@ -85,7 +85,7 @@ app.post('/login', (req, res) => {
   let userPass = req.body.password;
   let user = userSearchForID(userEmail, urlDatabase);
   
-  console.log('login route',userEmail, urlDatabase);
+
   if (!getUserByEmail(userEmail, users)) {
     res.status(403).send('Email cannot be found! Please register your email');
   } else if (!userEmail || !userPass) {
@@ -219,7 +219,6 @@ app.post('/register', (req, res) => {
       password: hashPass
       }
   
-  console.log(`This is the register `,users);
     
   req.session.user_id = users[userID].id;
   res.redirect('/');
