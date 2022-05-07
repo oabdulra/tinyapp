@@ -56,16 +56,29 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let userEmail = req.body.email;
-  res.cookie('username', userEmail);
+  let userEmail = req.cookies.user;
+  const templateVars= {
+    user: users[userEmail]
+    
+  };
+  res.cookie('username', templateVars);
+  res.render('login',templateVars);
   res.redirect('/urls');
 })
 
 //login post
 app.post('/login', (req, res) => {
-  let userEmail = req.body.email;
-  res.cookie('email', userEmail);
-  res.redirect('/');
+  let userEmail = userSearch(req.body.email);
+  let userPass = req.body.password;
+
+  if (!userEmail) {
+    res.status(403).send('Email cannot be found! Please register your email');
+  } else if (userEmail && !userPass) {
+    res.status(403).send('The password is incorrect, please try again');
+  } else {
+    res.redirect('/');
+  }
+  
 });
 
 //logout user
