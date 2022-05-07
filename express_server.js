@@ -76,6 +76,7 @@ app.post('/login', (req, res) => {
   } else if (userEmail && !userPass) {
     res.status(403).send('The password is incorrect, please try again');
   } else {
+    let user = req.cookies.email;
     res.redirect('/');
   }
   
