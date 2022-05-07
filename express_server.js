@@ -36,8 +36,11 @@ const urlDatabase = {
     }
 };
 
+/*-----------------------------------------------------------------------*/
+/* ------------------------- helper functions -------------------------- */
+/*-----------------------------------------------------------------------*/
 
-/* ---------- helper functions --------------- */
+
 
 //create a random alphanumerical string
 const generateRandomString = () => {
@@ -50,8 +53,26 @@ const generateRandomString = () => {
 const userSearch = (email) => {
   for (let user in users){
 
-    if(email === users[user][email]) {
-      return users[user][email];
+    if(email === users[user].email) {
+      return users[user].email;
+    }
+  }
+};
+
+const userSearchForID = (email) => {
+  for (let user in users){
+
+    if(email === users[user].email) {
+      return users[user].id;
+    }
+  }
+};
+
+const userSearchForPassword = (email) => {
+  for (let user in users){
+
+    if(email === users[user].email) {
+      return users[user].password;
     }
   }
 };
@@ -59,16 +80,28 @@ const userSearch = (email) => {
 //returns list of urls based on userID
 
 const urlsForUser = (id) => {
-
-  for (let urls in urlDatabase) {
-    if (id === urlDatabase[urls][userID]) {
-      return urlDatabase[urls][userID];
+  let urlObj = {};
+  let keys = Object.keys(urlDatabase);
+  
+  keys.forEach( (shortURL) => {
+    let temp = urlDatabase[shortURL];
+    if (id === temp.userID) {
+      console.log(temp);
+      urlObj[shortURL] = temp;
     }
-  }
+  });
+  console.log(urlObj);
+  return urlObj;
 
 };
 
-/* ---- server routes ---- */
+
+
+
+
+/*-----------------------------------------------------------------------*/
+/*---------------------------- server routes ---------------------------*/
+/*---------------------------------------------------------------------*/
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -84,41 +117,56 @@ app.get("/login", (req, res) => {
     user: users[user]
     
   };
-  res.cookie('user', templateVars);
+  res.cookie('user_id', templateVars);
   res.render('login',templateVars);
   
 })
 
 //login post
 app.post('/login', (req, res) => {
-  let userEmail = userSearch(req.body.email);
+  let userEmail = req.body.email;
   let userPass = req.body.password;
-
-  if (!userEmail) {
+  
+  if (!userSearch(userEmail)) {
     res.status(403).send('Email cannot be found! Please register your email');
-  } else if (userEmail && !userPass) {
-    res.status(403).send('The password is incorrect, please try again');
+  } else if (!userEmail || !userPass) {
+    res.status(403).send('Please enter your email/password and please try again');
+  } else if(userPass !== userSearchForPassword(userEmail) ) {
+    res.status(403).send('Access denied! Password is incorrect');
   } else {
-    let user = req.cookies.email;
+    
+    //let user = req.cookies.user_id;
+    
+    res.cookie('user_id', userSearchForID(userEmail));
     res.redirect('/');
   }
   
 });
 
 
+//logout user
+app.post('/logout' , (req, res) => {
+  res.clearCookie('user_id');
+  
+  res.redirect('/login');
+});
+
 
 
 app.get("/urls", (req, res) => {
   let user = req.cookies.user_id;
+  
   const templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(user),
     user: users[user],
     users 
   };
 
   if (!user) { 
-    res.status(401).send('Please login in TinyApp to access this page');
+    //res.status(403).send('Please login in TinyApp to access this page');
+    res.redirect('/login');
   } else {
+   
   res.render("urls_index", templateVars);
   }
 });
@@ -126,13 +174,13 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = req.cookies.user_id;
   const templateVars = { 
-    urls: urlDatabase,
+    urls: urlsForUser(user),
     user: users[user],
     users 
   };
 
   if (!user) { 
-    res.status(401).send('Please login in TinyApp to access this page');
+    res.redirect('/login');
   } else {
   res.render("urls_new", templateVars);
   }
@@ -147,15 +195,16 @@ app.post("/urls", (req, res) => {
   
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    user: req.cookies.user
+    userID: req.cookies.user_id
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 //routes short link
 app.get("/urls/:shortURL", (req, res) => {
+  const user = req.cookies.user_id;
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL,
-  user: users[user][email]};
+  user: users[user]};
   res.render("urls_show", templateVars);
 });
 
@@ -167,15 +216,23 @@ app.get("/u/:shortURL", (req, res) => {
 
 //lets the user edit their link
 app.post("urls/:shortURL", (req, res) => {
-  const user = req.cookies.user;
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  res.redirect('/urls');
+  const user = req.cookies.user_id;
+  
+
+  if (user !== urlDatabase[req.params.shortURL].userID) {
+    res.status(403).send('You cannot edit a link you do not own');
+  } else {
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    res.redirect('/urls');
+  }
+
+  
 });
 
 //register user page
 app.get('/register', (req, res) => {
   
-  const user = req.cookies.user;
+  const user = req.cookies.user_id;
 
   const templateVars = { 
     user: users[user]
@@ -184,6 +241,7 @@ app.get('/register', (req, res) => {
 
 });
 
+//posts user registration
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
 
@@ -193,12 +251,14 @@ app.post('/register', (req, res) => {
     res.status(400).send('Email is already registered! Please log in or use a different email')
 
   } else {
+    
       users[userID] = {
       id: userID,
       email: req.body.email,
       password: req.body.password
       }
-  res.cookie('user',users[userID][id]);
+    
+  res.cookie('user_id',users[userID].id);
   res.redirect('/');
   }
 })
@@ -207,15 +267,19 @@ app.post('/register', (req, res) => {
 
 //delete link created
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/");
+  const user = req.cookies.user_id;
+  
+
+  if (user !== urlDatabase[req.params.shortURL].userID) {
+    res.status(403).send('You cannot delete a link you do not own');
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/");
+  }
+  
 });
 
-//logout user
-app.post("/logout" , (req, res) => {
-  res.clearCookie('user');
-  res.redirect('/login');
-});
+
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
