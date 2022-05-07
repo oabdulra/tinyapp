@@ -81,6 +81,7 @@ const userSearchForPassword = (email) => {
     }
   }
 };
+console.log(userSearchForPassword("user2@example.com"));
 
 //returns list of urls based on userID
 
@@ -131,12 +132,14 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
-  
+  let user = userSearchForID(userEmail);
+  console.log(userSearchForPassword(userEmail));
+
   if (!userSearch(userEmail)) {
     res.status(403).send('Email cannot be found! Please register your email');
   } else if (!userEmail || !userPass) {
     res.status(403).send('Please enter your email/password and please try again');
-  } else if(userPass !== userSearchForPassword(userEmail) ) {
+  } else if(!(bcrypt.compareSync(userPass, userSearchForPassword(userEmail)) )) {
     res.status(403).send('Access denied! Password is incorrect');
   } else {
     
@@ -249,18 +252,19 @@ app.get('/register', (req, res) => {
 //posts user registration
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
-
+  let hashPass = bcrypt.hashSync(req.body.password, 10);
+  console.log(hashPass);
   if(!req.body.email || !req.body.password) {
-    res.status(400).send('Login error! Please enter both your username and password');
+    res.status(403).send('Login error! Please enter both your username and password');
   } else if (userSearch(req.body.email)){
-    res.status(400).send('Email is already registered! Please log in or use a different email')
+    res.status(403).send('Email is already registered! Please log in or use a different email')
 
   } else {
     
       users[userID] = {
       id: userID,
       email: req.body.email,
-      password: req.body.password
+      password: hashPass
       }
     
   res.cookie('user_id',users[userID].id);
