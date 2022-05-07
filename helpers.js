@@ -16,9 +16,10 @@ const getUserByEmail = (email, database) => {
   for (let user in database){
 
     if(email === database[user].email) {
-      return database[user].email;
+      return database[user];
     }
   }
+  return 'undefined';
 };
 
 const userSearchForID = (email, database) => {
@@ -28,6 +29,7 @@ const userSearchForID = (email, database) => {
       return database[user].id;
     }
   }
+  return 'undefined';
 };
 
 const userSearchForPassword = (email, database) => {
