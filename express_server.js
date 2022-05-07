@@ -12,7 +12,18 @@ app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const cookieSession = require('cookie-session');
+app.use(cookieSession ({
+  name: 'session',
+  keys: ['keys'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+
+}));
+
 const bcrypt = require('bcryptjs');
+const { response } = require("express");
 
 app.set("view engine", "ejs");
 
@@ -118,12 +129,12 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let user = req.cookies.user_id;
+  let user = req.session.user_id;
   const templateVars= {
     user: users[user]
     
   };
-  res.cookie('user_id', templateVars);
+  req.session.user_id = templateVars;
   res.render('login',templateVars);
   
 })
@@ -145,7 +156,7 @@ app.post('/login', (req, res) => {
     
     //let user = req.cookies.user_id;
     
-    res.cookie('user_id', userSearchForID(userEmail));
+    req.session.user_id =userSearchForID(userEmail);
     res.redirect('/');
   }
   
@@ -154,7 +165,7 @@ app.post('/login', (req, res) => {
 
 //logout user
 app.post('/logout' , (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   
   res.redirect('/login');
 });
@@ -162,7 +173,7 @@ app.post('/logout' , (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  let user = req.cookies.user_id;
+  let user = req.session.user_id;
   
   const templateVars = { 
     urls: urlsForUser(user),
@@ -180,7 +191,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
   const templateVars = { 
     urls: urlsForUser(user),
     user: users[user],
@@ -203,14 +214,14 @@ app.post("/urls", (req, res) => {
   
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies.user_id
+    userID: req.session.user_id
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 //routes short link
 app.get("/urls/:shortURL", (req, res) => {
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL,
   user: users[user]};
   res.render("urls_show", templateVars);
@@ -224,7 +235,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //lets the user edit their link
 app.post("urls/:shortURL", (req, res) => {
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
   
 
   if (user !== urlDatabase[req.params.shortURL].userID) {
@@ -240,7 +251,7 @@ app.post("urls/:shortURL", (req, res) => {
 //register user page
 app.get('/register', (req, res) => {
   
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
 
   const templateVars = { 
     user: users[user]
@@ -253,6 +264,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
   let hashPass = bcrypt.hashSync(req.body.password, 10);
+
   
   if(!req.body.email || !req.body.password) {
     res.status(403).send('Login error! Please enter both your username and password');
@@ -267,7 +279,7 @@ app.post('/register', (req, res) => {
       password: hashPass
       }
     
-  res.cookie('user_id',users[userID].id);
+  req.session.user_id = users[userID].id;
   res.redirect('/');
   }
 })
@@ -276,7 +288,7 @@ app.post('/register', (req, res) => {
 
 //delete link created
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
   
 
   if (user !== urlDatabase[req.params.shortURL].userID) {
