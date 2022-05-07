@@ -5,6 +5,7 @@ const express = require("express");
 const app = express();
 
 const PORT = 8080; // default port 8080
+const { generateRandomString , getUserByEmail , userSearchForID, userSearchForPassword, urlsForUser} = require('./helpers');
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -80,20 +81,20 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
-  let user = userSearchForID(userEmail);
+  let user = userSearchForID(userEmail, urlDatabase);
   
 
-  if (!userSearch(userEmail)) {
+  if (!getUserByEmail(userEmail, urlDatabase)) {
     res.status(403).send('Email cannot be found! Please register your email');
   } else if (!userEmail || !userPass) {
     res.status(403).send('Please enter your email/password and please try again');
-  } else if(!(bcrypt.compareSync(userPass, userSearchForPassword(userEmail)) )) {
+  } else if(!(bcrypt.compareSync(userPass, userSearchForPassword(userEmail, urlDatabase)) )) {
     res.status(403).send('Access denied! Password is incorrect');
   } else {
     
     //let user = req.cookies.user_id;
     
-    req.session.user_id =userSearchForID(userEmail);
+    req.session.user_id =userSearchForID(userEmail, urlDatabase);
     res.redirect('/');
   }
   
@@ -113,7 +114,7 @@ app.get("/urls", (req, res) => {
   let user = req.session.user_id;
   
   const templateVars = { 
-    urls: urlsForUser(user),
+    urls: urlsForUser(user, urlDatabase),
     user: users[user],
     users 
   };
@@ -130,7 +131,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = req.session.user_id;
   const templateVars = { 
-    urls: urlsForUser(user),
+    urls: urlsForUser(user, urlDatabase),
     user: users[user],
     users 
   };
@@ -205,7 +206,7 @@ app.post('/register', (req, res) => {
   
   if(!req.body.email || !req.body.password) {
     res.status(403).send('Login error! Please enter both your username and password');
-  } else if (userSearch(req.body.email)){
+  } else if (getUserByEmail(req.body.email, urlDatabase)){
     res.status(403).send('Email is already registered! Please log in or use a different email')
 
   } else {

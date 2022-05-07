@@ -1,4 +1,3 @@
-
 /*-----------------------------------------------------------------------*/
 /* ------------------------- helper functions -------------------------- */
 /*-----------------------------------------------------------------------*/
@@ -13,29 +12,29 @@ const generateRandomString = () => {
 }
 
 //searchs for a user with the email provided in form
-const userSearch = (email) => {
-  for (let user in users){
+const getUserByEmail = (email, database) => {
+  for (let user in database){
 
-    if(email === users[user].email) {
-      return users[user].email;
+    if(email === database[user].email) {
+      return database[user].email;
     }
   }
 };
 
-const userSearchForID = (email) => {
-  for (let user in users){
+const userSearchForID = (email, database) => {
+  for (let user in database){
 
-    if(email === users[user].email) {
-      return users[user].id;
+    if(email === database[user].email) {
+      return database[user].id;
     }
   }
 };
 
-const userSearchForPassword = (email) => {
-  for (let user in users){
+const userSearchForPassword = (email, database) => {
+  for (let user in database){
 
-    if(email === users[user].email) {
-      return users[user].password;
+    if(email === database[user].email) {
+      return database[user].password;
     }
   }
 };
@@ -44,12 +43,12 @@ const userSearchForPassword = (email) => {
 
 //returns list of urls based on userID
 
-const urlsForUser = (id) => {
+const urlsForUser = (id, database) => {
   let urlObj = {};
-  let keys = Object.keys(urlDatabase);
+  let keys = Object.keys(database);
   
   keys.forEach( (shortURL) => {
-    let temp = urlDatabase[shortURL];
+    let temp = database[shortURL];
     if (id === temp.userID) {
       
       urlObj[shortURL] = temp;
@@ -60,3 +59,5 @@ const urlsForUser = (id) => {
 
 };
 
+
+module.exports = { generateRandomString , getUserByEmail , userSearchForID, userSearchForPassword, urlsForUser};
