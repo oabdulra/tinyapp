@@ -160,14 +160,14 @@ app.post("/urls", (req, res) => {
 //routes short link
 app.get("/urls/:shortURL", (req, res) => {
   const user = req.session.user_id;
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL,
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
   user: users[user]};
   res.render("urls_show", templateVars);
 });
 
 //redirects short link to the actual long link
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -180,7 +180,8 @@ app.post("urls/:shortURL", (req, res) => {
     res.status(403).send('You cannot edit a link you do not own');
   } else {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-    res.redirect('/urls');
+    
+    res.redirect('/');
   }
 
   
