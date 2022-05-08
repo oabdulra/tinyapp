@@ -83,9 +83,9 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
-  let user = userSearchForID(userEmail, users);
   
-  if (!getUserByEmail(userEmail, users)) {
+  
+  if (!getUserByEmail(userEmail, users) || getUserByEmail(userEmail, users) === 'undefined') {
     res.status(403).send('Email cannot be found! Please register your email');
   } else if (!userEmail || !userPass) {
     res.status(403).send('Please enter your email/password and please try again');
@@ -206,7 +206,7 @@ app.post('/register', (req, res) => {
   
   if(!req.body.email || !req.body.password) {
     res.status(401).send('Login error! Please enter both your username and password');
-  } else if (!getUserByEmail(req.body.email, users)){
+  } else if (getUserByEmail(req.body.email, users) !== 'undefined'){
     res.status(401).send('Email is already registered! Please log in or use a different email')
 
   } else {
