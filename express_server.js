@@ -10,6 +10,8 @@ const { generateRandomString , getUserByEmail , userSearchForID, userSearchForPa
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 const cookieSession = require('cookie-session');
 app.use(cookieSession ({
@@ -81,9 +83,8 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
-  let user = userSearchForID(userEmail, urlDatabase);
+  let user = userSearchForID(userEmail, users);
   
-
   if (!getUserByEmail(userEmail, users)) {
     res.status(403).send('Email cannot be found! Please register your email');
   } else if (!userEmail || !userPass) {
@@ -120,7 +121,7 @@ app.get("/urls", (req, res) => {
   };
 
   if (!user) { 
-    //res.status(403).send('Please login in TinyApp to access this page');
+    
     res.redirect('/login');
   } else {
    
@@ -132,8 +133,7 @@ app.get("/urls/new", (req, res) => {
   const user = req.session.user_id;
   const templateVars = { 
     urls: urlsForUser(user, urlDatabase),
-    user: users[user],
-    users 
+    user: users[user], 
   };
 
   if (!user) { 
@@ -205,9 +205,9 @@ app.post('/register', (req, res) => {
 
   
   if(!req.body.email || !req.body.password) {
-    res.status(403).send('Login error! Please enter both your username and password');
-  } else if (getUserByEmail(req.body.email, users)){
-    res.status(403).send('Email is already registered! Please log in or use a different email')
+    res.status(401).send('Login error! Please enter both your username and password');
+  } else if (!getUserByEmail(req.body.email, users)){
+    res.status(401).send('Email is already registered! Please log in or use a different email')
 
   } else {
     
@@ -216,6 +216,7 @@ app.post('/register', (req, res) => {
       email: req.body.email,
       password: hashPass
       }
+  
   
     
   req.session.user_id = users[userID].id;
