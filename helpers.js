@@ -9,13 +9,13 @@ const generateRandomString = () => {
   let randomStr = Math.random().toString(36).substring(2, 8);
   
   return randomStr;
-}
+};
 
 //searchs for a user with the email provided in form
 const getUserByEmail = (email, database) => {
-  for (let user in database){
+  for (let user in database) {
 
-    if(email === database[user].email) {
+    if (email === database[user].email) {
       return user;
     }
   }
@@ -23,9 +23,9 @@ const getUserByEmail = (email, database) => {
 };
 
 const userSearchForID = (email, database) => {
-  for (let user in database){
+  for (let user in database) {
 
-    if(email === database[user].email) {
+    if (email === database[user].email) {
       return database[user].id;
     }
   }
@@ -33,9 +33,9 @@ const userSearchForID = (email, database) => {
 };
 
 const userSearchForPassword = (email, database) => {
-  for (let user in database){
+  for (let user in database) {
 
-    if(email === database[user].email) {
+    if (email === database[user].email) {
       return database[user].password;
     }
   }
@@ -49,7 +49,7 @@ const urlsForUser = (id, database) => {
   let urlObj = {};
   let keys = Object.keys(database);
   
-  keys.forEach( (shortURL) => {
+  keys.forEach((shortURL) => {
     let temp = database[shortURL];
     if (id === temp.userID) {
       
