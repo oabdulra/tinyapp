@@ -63,6 +63,8 @@ const urlDatabase = {
 
 
 /*---------------------------- GET routes ---------------------------*/
+
+//route to redirect to the '/urls' page
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -71,6 +73,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//route to the 'login' template page
 app.get("/login", (req, res) => {
   let user = req.session.user_id;
   const templateVars = {
@@ -80,6 +83,8 @@ app.get("/login", (req, res) => {
   res.render('login',templateVars);
 });
 
+//route to take in a user and redirect to the index page, if not
+//redirects to the login page
 app.get("/urls", (req, res) => {
   let user = req.session.user_id;
   
@@ -98,6 +103,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
+//route for creating new short urls
 app.get("/urls/new", (req, res) => {
   const user = req.session.user_id;
   const templateVars = {
@@ -112,7 +118,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//routes short link
+//routes short url to long url
 app.get("/urls/:shortURL", (req, res) => {
   const user = req.session.user_id;
   
@@ -131,7 +137,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//register user page
+//routes to register page
 app.get('/register', (req, res) => {
   const user = req.session.user_id;
 
@@ -164,7 +170,8 @@ app.post('/register', (req, res) => {
   }
 });
 
-//login post
+//login  post route to take in user email and pass
+//it generates appropiate error codes if inputs dont match up, etc
 app.post('/login', (req, res) => {
   let userEmail = req.body.email;
   let userPass = req.body.password;
@@ -181,14 +188,14 @@ app.post('/login', (req, res) => {
   }
 });
 
-//logout user
+//logout post route, clears the cookie session and redirects user to login
 app.post('/logout' , (req, res) => {
   req.session = null;
 
   res.redirect('/login');
 });
 
-//creates a short link and posts it
+//creates a short link and redirects to the 'urls_show' page
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   
@@ -199,7 +206,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-//lets the user edit their link
+//post route that lets the user edit their link
 app.post("/urls/:shortURL", (req, res) => {
   const user = req.session.user_id;
   
@@ -212,7 +219,7 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-//delete link created
+//post route that lets the user delete link created
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user = req.session.user_id;
   
