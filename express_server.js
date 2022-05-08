@@ -88,7 +88,6 @@ app.get("/urls", (req, res) => {
     user: users[user],
     users
   };
-  console.log("get urls route", templateVars);
 
   if (!user) {
     
@@ -209,7 +208,6 @@ app.post("/urls/:shortURL", (req, res) => {
   } else {
 
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-    console.log("urls post shorturl route",req.body.longURL);
     res.redirect('/');
   }
 });
